@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+<html lang='zh-CN'>
+
+<head>
+  <meta name="generator" content="Hexo 5.4.0">
+  <meta charset="utf-8">
+  
+
+  <meta http-equiv='x-dns-prefetch-control' content='on' />
+  <link rel='dns-prefetch' href='https://cdn.jsdelivr.net'>
+  <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+
+  <meta name="renderer" content="webkit">
+  <meta name="force-rendering" content="webkit">
+  <meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
+  <meta name="HandheldFriendly" content="True" >
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="theme-color" content="#f8f8f8">
+  <title>React-原理揭秘实践(下) - Basil</title>
+
+  
+    <meta name="description" content="用实践来揭开 React 的神秘面纱~">
+<meta property="og:type" content="article">
+<meta property="og:title" content="React-原理揭秘实践(下)">
+<meta property="og:url" content="https://basilbai.github.io/2018/08/22/React-%E5%8E%9F%E7%90%86%E6%8F%AD%E7%A7%98%E5%AE%9E%E8%B7%B5-%E4%B8%8B/index.html">
+<meta property="og:site_name" content="Basil">
+<meta property="og:description" content="用实践来揭开 React 的神秘面纱~">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://user-gold-cdn.xitu.io/2020/3/24/1710a381f500d6d3?w=550&h=417&f=gif&s=4875150">
+<meta property="article:published_time" content="2018-08-22T12:02:54.000Z">
+<meta property="article:modified_time" content="2022-06-18T06:53:37.000Z">
+<meta property="article:author" content="Basil">
+<meta property="article:tag" content="React">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://user-gold-cdn.xitu.io/2020/3/24/1710a381f500d6d3?w=550&h=417&f=gif&s=4875150">
+  
+  
+
+  <!-- feed -->
+  
+
+  
+    
+<link rel="stylesheet" href="/css/main.css">
+
+  
+
+  
+
+  
+</head>
+
+<body>
+  
+
+
+  <div class='l_body' id='start'>
+    <aside class='l_left' layout='post'>
+    
+
+
+<header class="header">
+
+<div class="logo-wrap"><a class="title" href="/"><div class="main">Basil</div><div class="sub cap">热爱技术记录分享</div></a></div>
+<nav class="menu dis-select"><a class="nav-item active" href="/">文章</a><a class="nav-item" href="/wiki/">项目</a><a class="nav-item" href="/notes/">笔记</a><a class="nav-item" href="/more/">更多</a></nav></header>
+
+<div class="widgets">
+
+<div class="widget-wrap single" id="toc"><div class="widget-header cap dis-select"><span class="name">本文目录</span></div><div class="widget-body fs14"><div class="doc-tree active"><ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%BC%95%E8%A8%80"><span class="toc-text">引言</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%AC%AC%E4%B8%83%E7%AB%99-%E7%A0%B4%E7%A2%8E%E4%B9%8B%E5%A2%9F-Component"><span class="toc-text">第七站: 破碎之墟 - Component</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%AC%AC%E5%85%AB%E7%AB%99-%E5%87%80%E5%8C%96%E4%B9%8B%E5%8C%99-setState"><span class="toc-text">第八站: 净化之匙 - setState</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%9B%B4%E6%96%B0%E4%BC%98%E5%8C%96"><span class="toc-text">更新优化</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BC%98%E5%8C%96%E7%AD%96%E7%95%A5"><span class="toc-text">优化策略</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#1-%E5%BC%82%E6%AD%A5%E5%8C%96"><span class="toc-text">1. 异步化:</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#2-%E4%BB%BB%E5%8A%A1%E5%88%86%E5%89%B2"><span class="toc-text">2. 任务分割</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%AD%90%E7%BB%84%E4%BB%B6%E6%9B%B4%E6%96%B0"><span class="toc-text">子组件更新</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%AC%AC%E4%B9%9D%E7%AB%99-%E7%94%9F%E5%91%BD%E4%B9%8B%E6%B3%89-Lifecycle"><span class="toc-text">第九站: 生命之泉 - Lifecycle</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E9%A6%96%E6%AC%A1%E6%B8%B2%E6%9F%93"><span class="toc-text">首次渲染:</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%9B%B4%E6%96%B0%E9%98%B6%E6%AE%B5"><span class="toc-text">更新阶段:</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%8D%B8%E8%BD%BD%E9%98%B6%E6%AE%B5"><span class="toc-text">卸载阶段:</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%8A%82%E7%82%B9%E7%94%9F%E5%91%BD%E5%91%A8%E6%9C%9F"><span class="toc-text">节点生命周期</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#1-create"><span class="toc-text">1. create</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#2-insert"><span class="toc-text">2. insert</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#3-willupdate-%E4%B8%8E-update"><span class="toc-text">3. willupdate 与 update</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#4-willremove"><span class="toc-text">4. willremove</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%BB%84%E4%BB%B6%E7%94%9F%E5%91%BD%E5%91%A8%E6%9C%9F"><span class="toc-text">组件生命周期</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%9C%80%E5%90%8E%E4%B8%80%E7%AB%99-%E6%97%85%E9%80%94%E4%B9%8B%E6%9C%AB"><span class="toc-text">最后一站: 旅途之末</span></a></li></ol></div></div></div>
+
+
+</div>
+
+
+    </aside>
+    <div class='l_main'>
+      
+
+      
+
+
+<div class="bread-nav fs12"><div id="breadcrumb"><a class="cap breadcrumb" href="/">Basil</a><span class="sep"></span><a class="cap breadcrumb" href="/">文章</a><span class="sep"></span><a class="cap breadcrumb-link" href="/categories/React/">React</a></div><div id="post-meta">发布于&nbsp;<time datetime="2018-08-22T12:02:54.000Z">2018-08-22</time></div></div>
+
+<article class='content md post'>
+<h1 class="article-title"><span>React-原理揭秘实践(下)</span></h1>
+<p>用实践来揭开 React 的神秘面纱~</p>
+<span id="more"></span>
+
+<h2 id="引言"><a href="#引言" class="headerlink" title="引言"></a>引言</h2><p>上一篇文章我们主要实现了 <strong>JSX</strong> 在 <code>WebGL</code> 上的渲染与更新，对 <strong>虚拟 DOM</strong> 和 <strong>Diff</strong> 有了更深的了解，但相比于我们使用的 <code>React</code>，还缺乏了之中很重要的一环 — <strong>组件模式</strong>。</p>
+<p>想必大家能认同，React 组件(<code>Component</code>)具有 <strong>强大的功能，高拓展性和高解耦性</strong>，在其基础上构建的各种 <code>UI</code> 组件框架完全改变了传统的 Web 开发模式，成为了 Web 中的大型复杂应用提供了一种很好的构建模式和保障，也让我们的开发效率也有了质的变化。</p>
+<p>在这篇文章中，我们会在上一篇的实现基础上，加入 <code>React</code> 组件模式，并在实现的过程中适时的去讲解一些原理和思维，也有利于大家 <strong>由浅入深的理解</strong> 和 <strong>编程思维上的提升</strong>。</p>
+<h2 id="第七站-破碎之墟-Component"><a href="#第七站-破碎之墟-Component" class="headerlink" title="第七站: 破碎之墟 - Component"></a>第七站: 破碎之墟 - Component</h2><p><strong>代码复用性</strong>，向来是编程领域一个核心的理念。我们最常使用 <strong>函数、类</strong> 方式进行代码的封装，但这里有个痛点:</p>
+<p><strong>Web 中 UI 与 逻辑 的分离的特性，导致较难优雅地整合封装。</strong></p>
+<p>通常我们需要引 <code>JS</code>、<code>CSS</code>，再在 <code>HTML</code> 中按规定书写结构，最后再初始化库。整个过程十分割裂，且不优雅。</p>
+<p>而 <code>React Component</code> 帮我们解决了这个痛点，即保持了 <strong>动态 UI</strong> 与 <strong>逻辑</strong> 的分离，又有了全新的整合方式。从而让 UI 组件变得非常的 <strong>高效易用</strong>，只需要在结构中以标签的形式引入即可。</p>
+<p>我们就继续在上篇文章的基础上，加入 <code>Component</code> 的特性。基于 <code>JSX</code> 的变量传递，我们只需要实现一个 <code>Component</code> 类，并针对性地去完成组件的 <strong>渲染和更新</strong> 即可。</p>
+<blockquote>
+<p>TIPs:</p>
+<p>由于组件的加入，这时我们的 <strong>虚拟 DOM(VNode)</strong> 就包含了两种类型: <strong>组件节点(compVNode)</strong> 和 **元素节点(elVNode)**。后续都会以此区分，便于讲解。</p>
+</blockquote>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 组件基类</span></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Component</span> </span>&#123;</span><br><span class="line">    <span class="comment">// 通过保持三份不同的时期的快照</span></span><br><span class="line">    <span class="comment">// 有利于对组件的状态及属性的管理和追踪</span></span><br><span class="line"></span><br><span class="line">    <span class="comment">// 属性</span></span><br><span class="line">    public __prevProps</span><br><span class="line">    public props = &#123;&#125;</span><br><span class="line">    public __nextProps</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 状态</span></span><br><span class="line">    public __prevState</span><br><span class="line">    public state = &#123;&#125;</span><br><span class="line">    public __nextState</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 储存当前组件渲染出的 VNode</span></span><br><span class="line">    public __vnode</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 储存 组件节点</span></span><br><span class="line">    public __component</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="title">constructor</span>(<span class="params">props</span>)</span> &#123;</span><br><span class="line">        <span class="comment">// 初始化参数</span></span><br><span class="line">        <span class="built_in">this</span>.props = props</span><br><span class="line">    &#125;</span><br><span class="line">    public render(): any &#123; <span class="keyword">return</span> <span class="literal">null</span> &#125;</span><br><span class="line">    public <span class="function"><span class="title">__createVNode</span>(<span class="params"></span>)</span> &#123;</span><br><span class="line">        <span class="comment">// 该方法用于封装重新执行 render 的逻辑</span></span><br><span class="line"></span><br><span class="line">        <span class="comment">// state 与 props 状态变更的逻辑</span></span><br><span class="line">        <span class="built_in">this</span>.__prevProps = <span class="built_in">this</span>.props</span><br><span class="line">        <span class="built_in">this</span>.__prevState = <span class="built_in">this</span>.state</span><br><span class="line"></span><br><span class="line">        <span class="built_in">this</span>.props = <span class="built_in">this</span>.__nextProps</span><br><span class="line">        <span class="built_in">this</span>.state = <span class="built_in">this</span>.__nextState</span><br><span class="line"></span><br><span class="line">        <span class="built_in">this</span>.__nextState = <span class="built_in">this</span>.__nextProps = <span class="literal">undefined</span></span><br><span class="line"></span><br><span class="line">        <span class="comment">// 重新执行 render 生成 VNode</span></span><br><span class="line">        <span class="built_in">this</span>.__vnode = <span class="built_in">this</span>.render()</span><br><span class="line"></span><br><span class="line">        <span class="keyword">return</span> <span class="built_in">this</span>.__vnode</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>有了这个类后，我们就可以使用 <code>React</code> 的方式继承出 <strong>自定义组件</strong> 进行渲染:</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">App</span> <span class="keyword">extends</span> <span class="title">Component</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="title">constructor</span>(<span class="params">props</span>)</span> &#123;</span><br><span class="line">        <span class="built_in">super</span>(props)</span><br><span class="line">        <span class="built_in">this</span>.state = &#123;</span><br><span class="line">            <span class="attr">content</span>: <span class="string">&#x27;ReactWebGL Component, Hello World&#x27;</span>,</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    public <span class="function"><span class="title">render</span>(<span class="params"></span>)</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> (</span><br><span class="line">            <span class="xml"><span class="tag">&lt;<span class="name">Container</span> <span class="attr">name</span>=<span class="string">&quot;parent&quot;</span>&gt;</span></span></span><br><span class="line"><span class="xml">                &#123;this.state.content&#125;</span></span><br><span class="line"><span class="xml">            <span class="tag">&lt;/<span class="name">Container</span>&gt;</span></span></span><br><span class="line">        )</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">render(<span class="xml"><span class="tag">&lt;<span class="name">App</span> /&gt;</span></span>, game.stage)</span><br></pre></td></tr></table></figure>
+
+<p>由于我们之前提过，<code>JSX</code> 是以 <strong>变量传递</strong> 的形式编译的。因此将 <code>&lt;App /&gt;</code> 转换成 <code>VNode</code> 后，其 <strong><code>vnode.type</code> 的值便是 <code>App</code> 这个类</strong>，并不是类似 <code>div</code> 那样的 <strong>字符串标签名</strong>。所以接下来我们需要实现一个 <strong>组件初始化</strong> 的函数(<code>Component</code>)。这个函数的主要功能是:</p>
+<p><strong>实例化组件并获取组件 <code>render</code> 方法中返回的 元素节点。</strong></p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 渲染组件</span></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">renderComponent</span>(<span class="params">compVNode</span>) </span>&#123;</span><br><span class="line">  <span class="keyword">const</span> &#123; <span class="attr">type</span>: Comp, props &#125; = compVNode;</span><br><span class="line">  <span class="keyword">let</span> instance = compVNode.instance;</span><br><span class="line"></span><br><span class="line">  <span class="comment">// 当 instance 已经存在时，则不需要重新创建实例</span></span><br><span class="line">  <span class="keyword">if</span> (!instance) &#123;</span><br><span class="line">    <span class="comment">// 传入 props，初始化组件实例</span></span><br><span class="line">    <span class="comment">// 支持 类组件 或者 函数组件</span></span><br><span class="line">    <span class="keyword">if</span> (Comp.prototype &amp;&amp; Comp.prototype.render) &#123;</span><br><span class="line">      instance = <span class="keyword">new</span> Comp(props);</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">      instance = <span class="keyword">new</span> Component(props);</span><br><span class="line">      instance.constructor = Comp;</span><br><span class="line">      instance.render = <span class="function">() =&gt;</span> instance.constructor(props);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 初次渲染时</span></span><br><span class="line">    <span class="comment">// 将来的属性与状态其实便是与当前值一致</span></span><br><span class="line">    instance.__nextProps = props;</span><br><span class="line">    instance.__nextState = instance.state;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="comment">// 调用 render 获取 VNode</span></span><br><span class="line">  <span class="keyword">const</span> vnode = instance.__createVNode();</span><br><span class="line"></span><br><span class="line">  <span class="comment">// 组件、元素、实例之间保持相互引用，有利于双向连接整棵虚拟树</span></span><br><span class="line">  instance.__component = compVNode;</span><br><span class="line">  compVNode.instance = instance;</span><br><span class="line">  compVNode.vnode = vnode;</span><br><span class="line">  vnode.component = compVNode;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">return</span> vnode;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>接下来我们只需要在 <code>createElm</code> 的函数加入: 当传入的为 <strong>组件节点</strong> 时调用函数初始化生成 <strong>元素节点</strong>，后续只需要继续原有的逻辑继续创建，便能正确渲染组件。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">createElm</span>(<span class="params">vnode</span>) </span>&#123;</span><br><span class="line">	<span class="comment">// 当为组件时，初始化组件</span></span><br><span class="line">	<span class="comment">// 重新赋值成 元素节点</span></span><br><span class="line">    <span class="keyword">if</span> (<span class="keyword">typeof</span> vnode.type === <span class="string">&#x27;function&#x27;</span>) &#123;</span><br><span class="line">        vnode = renderComponent(vnode)</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 维持原有逻辑</span></span><br><span class="line">    ...</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> vnode.elm</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>保存执行，页面中已经能正确的渲染出 <code>&lt;App&gt;</code> 组件了。延续之前的逻辑，在完成初次渲染后，接下来就是组件的更新。这就是我们最常使用的 <code>this.setState</code>了。</p>
+<h2 id="第八站-净化之匙-setState"><a href="#第八站-净化之匙-setState" class="headerlink" title="第八站: 净化之匙 - setState"></a>第八站: 净化之匙 - setState</h2><p>在上一篇文章中，我们实现了 <strong>虚拟 DOM</strong> 更新函数 <code>diff</code>。参数为 **新旧虚拟节点(<code>oldVNode</code>、<code>newVNode</code>)**。所以组件更新的原理也一样:</p>
+<p><strong>获取组件实例先后渲染的新旧 <code>VNode</code> 再触发 <code>diff</code> 函数。</strong></p>
+<p>在刚才 <code>Component </code>的渲染中，我们已经把 <code>render</code> 生成的 <code>VNode</code> 保存在 <code>this.__vnode</code> 上，这便是初始化时生成的 **旧虚拟节点(<code>oldVNode</code>)**。所以我们要做的就是:</p>
+<p><strong><code>setState</code> 中 更新状态，调用 <code>render</code> 生成 新虚拟节点(<code>newVNode</code>)，触发 <code>diff</code> 更新。</strong></p>
+<p>因此我们在类上新增两个方法: <code>setState</code> 和 <code>__update</code>:</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Component</span> </span>&#123;</span><br><span class="line">	<span class="comment">// 其余方法</span></span><br><span class="line">	...</span><br><span class="line"></span><br><span class="line">	<span class="comment">// 更新函数</span></span><br><span class="line">	public __update = <span class="function">() =&gt;</span> &#123;</span><br><span class="line">        <span class="comment">// 临时存储 旧虚拟节点 (oldVNode)</span></span><br><span class="line">        <span class="keyword">const</span> oldVNode = <span class="built_in">this</span>.__vnode</span><br><span class="line"></span><br><span class="line">        <span class="built_in">this</span>.__nextProps = <span class="built_in">this</span>.props</span><br><span class="line">        <span class="keyword">if</span> (!<span class="built_in">this</span>.__nextState) <span class="built_in">this</span>.__nextState = <span class="built_in">this</span>.state</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 重新生成 新虚拟节点(newVNode)</span></span><br><span class="line">        <span class="built_in">this</span>.__vnode = <span class="built_in">this</span>.__createVNode()</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 调用 diff，更新 VNode</span></span><br><span class="line">        diff(oldVNode, <span class="built_in">this</span>.__vnode)</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 更新状态</span></span><br><span class="line">    public <span class="function"><span class="title">setState</span>(<span class="params">partialState, callback?</span>)</span> &#123;</span><br><span class="line">        <span class="comment">// 合并状态, 暂存于 即将更新态 中</span></span><br><span class="line">        <span class="keyword">if</span> (<span class="keyword">typeof</span> partialState === <span class="string">&#x27;function&#x27;</span>) &#123;</span><br><span class="line">            partialState = partialState(<span class="built_in">this</span>.state)</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="built_in">this</span>.__nextState = &#123;</span><br><span class="line">            ...this.state,</span><br><span class="line">            ...partialState,</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 调用更新，并执行回调</span></span><br><span class="line">        <span class="built_in">this</span>.__update()</span><br><span class="line">        callback &amp;&amp; callback()</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="更新优化"><a href="#更新优化" class="headerlink" title="更新优化"></a>更新优化</h3><p>到这里我们可以看出: <code>setState</code> 封装了 <code>diff</code> 方法。但由于 <code>diff</code> 的复杂度，性能的优化会是一个我们需要着重考虑的点。每执行一次 <code>setState</code>，就需要重新生成 <code>newVNode</code> 进行 <code>diff</code>。因此，当组件非常复杂时或者连续更新时，可能会导致 <strong>主进程的阻塞，造成页面的卡死。</strong></p>
+<p>这里我们需要有两个优化:</p>
+<ul>
+<li><p><strong><code>setState</code> 异步化，避免阻塞主进程；</strong></p>
+</li>
+<li><p><strong><code>setState</code> 合并，多次连续调用会被最终合并成一次；</strong></p>
+<ul>
+<li><p>同一组件 <strong>连续多次更新</strong>；</p>
+</li>
+<li><p>父子级连续触发更新，由于 <strong>父级更新其实已经包含子级的更新</strong>，此时如果子级再自我更新一次，则就变成了一种无谓消耗；</p>
+</li>
+</ul>
+</li>
+</ul>
+<p>为了这个优化，我们首先需要一个更新队列功能:</p>
+<ul>
+<li><p><strong>可以异步化调用更新</strong>；</p>
+</li>
+<li><p><strong>为组件标注，保证一次循环中单个组件只会更新一次</strong>；</p>
+</li>
+</ul>
+<p>我们先来实现个 异步执行队列:</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 更新异步化，采用属于微任务的 Promise，兼容性使用 setTimeout</span></span><br><span class="line"><span class="comment">// 这里使用微任务，可以保证宏任务的优先执行</span></span><br><span class="line"><span class="comment">// 保证例如 UI渲染 等更为重要的任务，避免页面卡顿；</span></span><br><span class="line"><span class="keyword">const</span> defer =</span><br><span class="line">  <span class="keyword">typeof</span> <span class="built_in">Promise</span> === <span class="string">&quot;function&quot;</span></span><br><span class="line">    ? <span class="built_in">Promise</span>.prototype.then.bind(<span class="built_in">Promise</span>.resolve())</span><br><span class="line">    : <span class="built_in">setTimeout</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 更新队列</span></span><br><span class="line"><span class="keyword">const</span> updateQueue: any[] = [];</span><br><span class="line"></span><br><span class="line"><span class="comment">// 队列更新 API</span></span><br><span class="line"><span class="keyword">export</span> <span class="function"><span class="keyword">function</span> <span class="title">enqueueRender</span>(<span class="params">updater</span>) </span>&#123;</span><br><span class="line">  <span class="comment">// 将所有 updater 同步推入更新队列中</span></span><br><span class="line">  <span class="comment">// 为实例添加一个属性 __dirty，标识是否处于待更新状态</span></span><br><span class="line">  <span class="comment">// 初始 和 更新完毕，该值会被置为 false</span></span><br><span class="line">  <span class="comment">// 推入队列时，标记为 true</span></span><br><span class="line">  <span class="keyword">if</span> (</span><br><span class="line">    !updater.__dirty &amp;&amp;</span><br><span class="line">    (updater.__dirty = <span class="literal">true</span>) &amp;&amp;</span><br><span class="line">    updateQueue.push(updater) === <span class="number">1</span></span><br><span class="line">  ) &#123;</span><br><span class="line">    <span class="comment">// 异步化冲洗队列</span></span><br><span class="line">    <span class="comment">// 最终只执行一次冲洗</span></span><br><span class="line">    defer(flushRenderQueue);</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 合并一次循环中多次 updater</span></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">flushRenderQueue</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">  <span class="keyword">if</span> (updateQueue.length) &#123;</span><br><span class="line">    <span class="comment">// 排序更新队列</span></span><br><span class="line">    updateQueue.sort();</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 循环队列出栈</span></span><br><span class="line">    <span class="keyword">let</span> curUpdater = updateQueue.pop();</span><br><span class="line">    <span class="keyword">while</span> (curUpdater) &#123;</span><br><span class="line">      <span class="comment">// 当组件处于 待更新态 时，触发组件更新</span></span><br><span class="line">      <span class="comment">// 如果该组件已经被更新完毕，则该状态为 false</span></span><br><span class="line">      <span class="comment">// 则后续的更新均不再执行</span></span><br><span class="line">      <span class="keyword">if</span> (curUpdater.__dirty) &#123;</span><br><span class="line">        <span class="comment">// 调用组件自身的更新函数</span></span><br><span class="line">        curUpdater.__update();</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 执行 callback</span></span><br><span class="line">        flushCallback(curUpdater);</span><br><span class="line">      &#125;</span><br><span class="line"></span><br><span class="line">      curUpdater = updateQueue.pop();</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 执行缓存在 updater.__setStateCallbacks 上的回调</span></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">flushCallback</span>(<span class="params">updater</span>) </span>&#123;</span><br><span class="line">  <span class="keyword">const</span> callbacks = updater.__setStateCallbacks;</span><br><span class="line">  <span class="keyword">let</span> cbk;</span><br><span class="line">  <span class="keyword">if</span> (callbacks &amp;&amp; callbacks.length) &#123;</span><br><span class="line">    <span class="keyword">while</span> ((cbk = callbacks.shift())) cbk.call(updater);</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>完成这个方法后，我们来修改下上面的 <code>setState</code> 函数:</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Component</span> </span>&#123;</span><br><span class="line">	<span class="comment">// 其余方法</span></span><br><span class="line">	...</span><br><span class="line"></span><br><span class="line">	public <span class="function"><span class="title">setState</span>(<span class="params">partialState = &#123;&#125;, callback?</span>)</span> &#123;</span><br><span class="line">        <span class="comment">// 合并状态, 暂存于 即将更新态 中</span></span><br><span class="line">        <span class="comment">// 处理参数为函数的形式</span></span><br><span class="line">        <span class="keyword">if</span> (<span class="keyword">typeof</span> partialState === <span class="string">&#x27;function&#x27;</span>) &#123;</span><br><span class="line">            partialState = partialState(<span class="built_in">this</span>.state, <span class="built_in">this</span>.props)</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="built_in">this</span>.__nextState = &#123;</span><br><span class="line">            ...this.state,</span><br><span class="line">            ...partialState,</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 缓存回调</span></span><br><span class="line">        callback &amp;&amp; <span class="built_in">this</span>.__setStateCallbacks.push(callback)</span><br><span class="line">        <span class="comment">// 把组件自身先推入更新队列</span></span><br><span class="line">        enqueueUpdate(<span class="built_in">this</span>)</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>此时，由于 <strong>更新队列</strong> 为异步的，因此当多次连续调用 <code>setState</code> 时，组件的状态会被 <strong>同步合并</strong>，待全部完成后，才会进入更新队列的冲洗并最终只执行一次组件更新。</p>
+<p>React 中组件还有个更新的方法: <code>forceUpdate(callback)</code>，该方法的功能其实是与 <code>this.setState(&#123;&#125;, callback)</code> 相同的，唯一有个需要注意的点就是: <strong>触发的更新不需要经过 <code>shouldComponentUpdate</code> 的判断</strong>，实现只需要加个标识位即可。</p>
+<h3 id="优化策略"><a href="#优化策略" class="headerlink" title="优化策略"></a>优化策略</h3><p>回到性能优化这个点，从这里的简单实现我们可以看出: 虽然异步化了更新流程，但本质上仍然没有解决 复杂的组件 <code>diff</code> 带来长时间执行阻塞主进程。我记得以前文章有说过: <strong>最有效的性能优化方式就是 异步、任务分割 和 缓存策略。</strong></p>
+<h4 id="1-异步化"><a href="#1-异步化" class="headerlink" title="1. 异步化:"></a>1. 异步化:</h4><p>通过把同步的代码执行变成异步，把串行变成并行，可以有效提高 <strong>执行的时间利用率</strong> 和 <strong>保证代码优先级</strong>。从这里可以延伸出两种优化方向:</p>
+<ul>
+<li><ol>
+<li><strong>异步</strong>: 如我们上面所做的优化，这样能保证主进程的执行优先级，保证页面渲染或者更主要任务的优先执行，避免卡顿；</li>
+</ol>
+</li>
+<li><ol start="2">
+<li><strong>并行</strong>: 通过把某些高消耗的操作放到 <strong>非主进程</strong> 上执行，例如 worker 线程。不过由于 <code>diff</code> 本身就较为复杂，还要需要处理好主进程与线程之间的交互，会导致复杂度极高，但也并非不可行，后续也许是个优化方向。</li>
+</ol>
+<ul>
+<li>例如我就在思考在这里引入 wasm 的可能性，代价与收益比如何，有兴趣的童鞋可以一起探讨。</li>
+</ul>
+</li>
+</ul>
+<h4 id="2-任务分割"><a href="#2-任务分割" class="headerlink" title="2. 任务分割"></a>2. 任务分割</h4><p>将原本会阻塞主进程的 <strong>大块逻辑执行进行拆解，分割成一个个小任务</strong>。从而可以在逻辑中找到合适的时机点 <strong>分段执行</strong>，即 <strong>不会阻塞主进程，又可以让代码快速高效的执行，最大化利用物理资源。</strong></p>
+<p>Facebook 的大神们选择了这条优化方向，这就是 React 16 新引入的 <code>Fiber</code> 理念的最主要目的。上面我们实现的 <code>diff</code> 中，有着一个很大的障碍:</p>
+<p><strong>一棵完整 虚拟 DOM 树 更新，必须一次性更新完成，中间无法被暂停，也无法被分割。</strong></p>
+<p>而 <code>Fiber</code> 最主要的功能就是 <strong>指针映射，保存上一个更新的组件与下一步需要更新的组件</strong>，从而完成 <strong>可暂停可重启</strong>。计算进程的运行时间，利用浏览器的 <code>requestIdleCallback</code> 与 <code>requestAnimationFrame</code> 接口，当有优先级更高的任务时，优先执行，暂停下一个组件的更新。待空闲时再重启更新。</p>
+<p><code>Fiber</code> 算是一种编程思想，在其它语言中也有许多应用(<code>Ruby Fiber</code>)。核心思想是:</p>
+<p><strong>任务拆分和协同，主动把执行权交给主线程，使主线程有时间空挡处理其他高优先级任务。</strong></p>
+<p>但实现复杂度较高，为了本文便于理解，暂时并没有引入。等以后有机会我们再来一起深挖 <code>Fiber</code> 的实现，也许能成为更多使用场景的性能优化手段。</p>
+<h3 id="子组件更新"><a href="#子组件更新" class="headerlink" title="子组件更新"></a>子组件更新</h3><p>在上篇文章中，我们优先实现了 <code>diffVNode</code> 方法用于更新 <strong>元素节点</strong>，但组件节点的更新与元素节点的更新是不同的。当出现组件嵌套的情况时，我们就需要一个新的方法(<code>diffComponent</code>)用于组件节点的更新。</p>
+<p>与 <strong>元素节点</strong> 不同，组件节点之间的更新重要的是重渲染，类似于我们上面的 <code>setState</code>。</p>
+<p><strong>复用已创建好的组件实例，根据新的 状态(<code>state</code>)与 属性(<code>props</code>) 重新执行 <code>render</code> 生成 元素节点，再递归比对</strong>，</p>
+<p>也就是说，我们需要在 <code>diffVNode</code> 外围再做一层判断处理:</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">diff</span>(<span class="params">oldVNode, newVNode</span>) </span>&#123;</span><br><span class="line">	<span class="keyword">if</span> (isSameVNode(oldVNode, newVNode)) &#123;</span><br><span class="line">        <span class="keyword">if</span> (<span class="keyword">typeof</span> oldVNode.type === <span class="string">&#x27;function&#x27;</span>) &#123;</span><br><span class="line">            <span class="comment">// 组件节点</span></span><br><span class="line">            diffComponent(oldVNode, newVNode)</span><br><span class="line">        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">            <span class="comment">// 元素节点，</span></span><br><span class="line">            <span class="comment">// 直接执行比对</span></span><br><span class="line">            diffVNode(oldVNode, newVNode)</span><br><span class="line">        &#125;</span><br><span class="line">	&#125; <span class="keyword">else</span> &#123;</span><br><span class="line">		<span class="comment">// 新节点替换旧节点</span></span><br><span class="line">		...</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment">// 组件比对</span></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">diffComponent</span>(<span class="params">oldCompVNode, newCompVNode</span>) </span>&#123;</span><br><span class="line">    <span class="keyword">const</span> &#123; instance, <span class="attr">vnode</span>: oldVNode, elm &#125; = oldCompVNode</span><br><span class="line">    <span class="keyword">const</span> &#123; <span class="attr">props</span>: nextProps &#125; = newCompVNode</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (instance &amp;&amp; oldVNode) &#123;</span><br><span class="line">        instance.__dirty = <span class="literal">false</span></span><br><span class="line"></span><br><span class="line">        <span class="comment">// 更新状态和属性</span></span><br><span class="line">        instance.__nextProps = nextProps</span><br><span class="line">        <span class="keyword">if</span> (!instance.__nextState) instance.__nextState = instance.state</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 复用旧组件实例和元素</span></span><br><span class="line">        newCompVNode.instance = instance</span><br><span class="line">        newCompVNode.elm = elm</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 使用新属性、新状态，旧组件实例</span></span><br><span class="line">        <span class="comment">// 重新生成 新虚拟DOM</span></span><br><span class="line">        <span class="keyword">const</span> newVNode = initComponent(newCompVNode)</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 递归触发 diff</span></span><br><span class="line">        diff(oldVNode, newVNode)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="第九站-生命之泉-Lifecycle"><a href="#第九站-生命之泉-Lifecycle" class="headerlink" title="第九站: 生命之泉 - Lifecycle"></a>第九站: 生命之泉 - Lifecycle</h2><p>组件有一个相当重要的特征，便是具有 <strong>生命周期</strong>。不同的函数钩子对应了组件 <strong>从初始化到销毁</strong> 的各个关键时间点。主要是为了让业务方有能力 <strong>插入组件的渲染工作流</strong> 中，编写业务逻辑。我们先来简单梳理下最新 React 组件的生命周期:</p>
+<h3 id="首次渲染"><a href="#首次渲染" class="headerlink" title="首次渲染:"></a><strong>首次渲染</strong>:</h3><ul>
+<li><p><strong><code>constructor</code></strong></p>
+<ul>
+<li>即组件的 <strong>实例化时机</strong>，通常可以用来设置初始化 <code>state</code>；</li>
+</ul>
+</li>
+<li><p><strong><code>static getDerivedStateFromProps(nextProps, prevState)</code></strong></p>
+<ul>
+<li><p>在组件的模板渲染中，我们通常使用的数据为 <code>state</code> 和 <code>props</code>，而 <code>props</code> 由父级传入，组件本身并无法直接修改，因此唯一的常见需求就是: **根据父级传入的 <code>props</code> 动态修改 <code>state</code>**。该生命周期就是为此而生；</p>
+</li>
+<li><p>大家可能会有疑问: <strong>该方法为什么为静态方法? 而不是常规的实例方法呢？</strong></p>
+<ul>
+<li>先肯定一点: <strong>使用实例方法肯定也是能满足需求的</strong>。但这个钩子比较特殊，它的执行时机是位于 <strong>新状态合并之后，重渲染之前</strong>，而且该方法会 <strong>侵入更新机制</strong> 中。如果在之中做例如修改状态之类的操作是十分不可控的。当设计为静态方法后，函数内部便无法访问组件实例，成为一个 <strong>纯函数</strong>，便能保证更新流程的安全与稳定。</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p><strong><code>render()</code></strong></p>
+<ul>
+<li>根据 <code>state</code> 和 <code>props</code>，生成 <strong>虚拟 DOM</strong>；</li>
+</ul>
+</li>
+<li><p><strong><code>componentDidMount()</code></strong></p>
+<ul>
+<li><strong>组件被创建成真实元素并渲染后</strong> 被调用，此时可获取真实的元素状态，主要用于业务逻辑的执行，例如数据请求，事件绑定等；</li>
+</ul>
+</li>
+</ul>
+<h3 id="更新阶段"><a href="#更新阶段" class="headerlink" title="更新阶段:"></a><strong>更新阶段</strong>:</h3><ul>
+<li><p><strong><code>static getDerivedStateFromProps(nextProps, prevState)</code></strong></p>
+</li>
+<li><p><strong><code>shouldComponentUpdate(nextProps, nextState)</code></strong></p>
+<ul>
+<li><p>上篇文章中的 <code>diff</code> 优化策略中有提到: 为了减少 <strong>无谓的更新消耗</strong>，赋予组件一个可以 <strong>主动中断更新流</strong> 的 <code>API</code>。根据参数中的 <strong>更新属性</strong> 和 <strong>更新状态</strong>，业务方自行判断是否需要继续往下执行 <code>diff</code>，从而能有效地提升 <strong>更新性能</strong>；</p>
+</li>
+<li><p>大家记得 React 中有种组件叫 <strong>纯组件(<code>PureComponent</code>)</strong> 吧，其实这个类继承于普通的 <code>Component</code> 上封装的，可以减少多余的 <code>render</code>，提升性能。</p>
+<ul>
+<li><p>默认使用 <code>shouldComponentUpdate</code> 函数设定更新条件: <strong>仅当 <code>props</code> 和 <code>state</code> 发生改变时，才会触发更新</strong>。这里使用了 <code>Object</code> 浅层比对，也就是仅做第一层比对，即 <strong>1. key 是否完全匹配；2. value 是否全等；</strong> 所以如果需要超过一层的数据变动，纯组件即无法正确更新了；</p>
+</li>
+<li><p>这也是为什么 React 提倡使用 <strong>不变数据</strong> 的原理，能有效地使用浅层比对；</p>
+</li>
+<li><p><strong>不变数据</strong>: 提倡数据不可变，任何修改都需要返回一个新的对象，不能直接修改原对象，这样能有效提高比对效率，减少无谓性能损耗。</p>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p><strong><code>render()</code></strong></p>
+</li>
+<li><p><strong><code>getSnapshotBeforeUpdate(prevProps, prevState)</code></strong></p>
+<ul>
+<li><p>替换旧版的 <code>componentWillUpdate</code>，触发时机点: 在数据状态已更新，最新 <code>VNode</code> 已生成，但 <strong>真实元素还未被更新</strong>；</p>
+</li>
+<li><p>可以用来在 <strong>更新之前</strong> 从真实元素或状态中获取计算一些信息，便于在更新后使用；</p>
+</li>
+</ul>
+</li>
+<li><p><strong><code>componentDidUpdate(prevProps, prevState, snapshot)</code></strong></p>
+<ul>
+<li><p>组件更新完成后调用；</p>
+</li>
+<li><p>可以用于 <strong>监听数据变化</strong>，使用 <code>setState</code> 时必须加条件，避免无限循环；</p>
+</li>
+</ul>
+</li>
+</ul>
+<h3 id="卸载阶段"><a href="#卸载阶段" class="headerlink" title="卸载阶段:"></a><strong>卸载阶段</strong>:</h3><ul>
+<li><strong><code>componentWillUnmount()</code></strong><ul>
+<li>组件即将被销毁。通常可以用于 <strong>解绑事件</strong>、<strong>清除数据</strong>、<strong>释放内存</strong> 等功能；</li>
+</ul>
+</li>
+</ul>
+<p>我们也按这样的目标来在我们的 <code>Component</code> 上实现这些生命周期，那如何更好的组织生命周期呢？这里我考虑到的是:</p>
+<p><strong>组件作为元素的容器，生命周期的本质其实是 其渲染出的元素节点的生命周期</strong>。<br>也就是说，关键点还是在于 <strong>元素在视图中的工作流，何时被挂载 - 更新 - 卸载</strong>。所以为了更好的维护性和拓展性，更理想的方式应该是 <strong>为元素节点统一添加生命周期</strong>，而不是单独为组件，这样可大大降低复杂度，增加可拓展性。</p>
+<h3 id="节点生命周期"><a href="#节点生命周期" class="headerlink" title="节点生命周期"></a>节点生命周期</h3><p>那我们第一步先根据上面需要的生命周期来理一下需要哪些时机:</p>
+<ul>
+<li>**创建后(<code>create</code>)**；</li>
+<li>**挂载后(<code>insert</code>)**；</li>
+<li>**更新前(<code>willupdate</code>)**；</li>
+<li>**更新后(<code>update</code>)**；</li>
+<li>**删除前(<code>willremove</code>)**；</li>
+</ul>
+<p>原理就很简单了，只需要在 <code>VNode</code> 工作流中的对应时期调用相应的生命周期函数即可。那我们现在 <code>VNode</code> 上新增一个属性 <code>hooks</code>，用于 <strong>储存</strong> 对应的生命周期函数:</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">interface VNode &#123;</span><br><span class="line">	...</span><br><span class="line"></span><br><span class="line">	<span class="attr">hooks</span>: &#123;</span><br><span class="line">        create?: <span class="function">(<span class="params">vnode</span>) =&gt;</span> <span class="keyword">void</span></span><br><span class="line">        insert?: <span class="function">(<span class="params">vnode</span>) =&gt;</span> <span class="keyword">void</span></span><br><span class="line">        willupdate?: <span class="function">(<span class="params">oldVNode, newVNode</span>) =&gt;</span> <span class="keyword">void</span></span><br><span class="line">        update?: <span class="function">(<span class="params">oldVNode, newVNode</span>) =&gt;</span> <span class="keyword">void</span></span><br><span class="line">        willremove?: <span class="function">(<span class="params">vnode</span>) =&gt;</span> <span class="keyword">void</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>新增一个触发的方法(<code>fireVNodeHook</code>):</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">fireVNodeHook</span>(<span class="params">vnode, name, ...data</span>) </span>&#123;</span><br><span class="line">  <span class="comment">// 根据 生命周期名称</span></span><br><span class="line">  <span class="comment">// 执行储存在 VNode 上的对应函数即可</span></span><br><span class="line">  <span class="keyword">const</span> &#123; <span class="attr">hooks</span>: _hooks &#125; = vnode;</span><br><span class="line">  <span class="keyword">if</span> (_hooks) &#123;</span><br><span class="line">    hook = _hooks[name];</span><br><span class="line">    hook &amp;&amp; hook(...data);</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>有了这层基础方法后，我们只需要分别在之前所写的 <strong>渲染与更新</strong> 流程中的各个函数适时地触发就行了。</p>
+<h4 id="1-create"><a href="#1-create" class="headerlink" title="1. create"></a>1. <code>create</code></h4><p>该时机是在 <strong>元素被创建后，但还未被挂载之前</strong>。由于我们之前将逻辑统一收归为 <code>createElm</code>，因此只需要在该函数末尾统一加入触发即可。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">createElm</span>(<span class="params">vnode</span>) </span>&#123;</span><br><span class="line">	<span class="comment">// 创建元素逻辑</span></span><br><span class="line">	...</span><br><span class="line"></span><br><span class="line">	<span class="comment">// 触发 虚拟DOM 上储存的 钩子函数</span></span><br><span class="line">	fireVNodeHook(vnode, <span class="string">&#x27;create&#x27;</span>, vnode)</span><br><span class="line"></span><br><span class="line">	<span class="keyword">return</span> vnode.elm</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="2-insert"><a href="#2-insert" class="headerlink" title="2. insert"></a>2. <code>insert</code></h4><p><strong>元素被挂载到视图</strong> 上的时机。从元素的角度来看，就是被 <code>append</code> 到父级中的时机点。这个时机点比较分散，但也比较好加入，找到我们使用 <code>Api</code> 中的 <code>append</code> 方法加入，总共有三个地方:</p>
+<ul>
+<li><code>render</code> 函数中加入对 <strong>根节点</strong> 的触发；</li>
+<li><code>createElm</code> 函数中加入对 <strong>所有子级</strong> 的触发；</li>
+<li><code>diffChildren</code> 列表比对中 <strong>新增列表项</strong> 的触发；</li>
+</ul>
+<h4 id="3-willupdate-与-update"><a href="#3-willupdate-与-update" class="headerlink" title="3. willupdate 与 update"></a>3. <code>willupdate</code> 与 <code>update</code></h4><p><strong>更新之前</strong> 与 <strong>更新之后</strong>，对应的便是我们的 <code>diff</code> 函数。由于最终均需走到 <code>diffVNode</code> 中，因此只需要在 <code>diffVNode</code> 开头和末尾触发即可。</p>
+<h4 id="4-willremove"><a href="#4-willremove" class="headerlink" title="4. willremove"></a>4. <code>willremove</code></h4><p><strong>元素被卸载时</strong>，其实与 <code>insert</code> 类似，只需要关注 <code>Api</code> 中 <code>removeChild</code> 的调用时机即可。在 <code>diff</code> 列表比对期间，当新列表中不存在时，我们需要删除旧列表中的元素，也就是之前写的业务函数 <code>removeVNodes</code>。</p>
+<h3 id="组件生命周期"><a href="#组件生命周期" class="headerlink" title="组件生命周期"></a>组件生命周期</h3><p>由于 <strong>元素节点</strong> 才是贯穿整棵 <strong>虚拟 DOM</strong> 渲染与更新的关键，因此我们上面先实现的是对 <strong>元素节点</strong> 的生命周期触发。但是我们最终需要是 <strong>组件节点</strong> 的生命周期。由于 <strong>组件节点</strong> 与 <strong>元素节点</strong> 为一一对应的 <strong>上下层级关系</strong>，因此这里我们还需要做一层转接:</p>
+<p><strong>把组件节点的生命周期赋值给其生成的元素节点</strong>。</p>
+<p>首先我们先来为组件定义上生命周期，并定义一个中转对象 <code>__hooks</code>，实现 <strong>组件节点周期与元素节点周期的转换</strong>:</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Component</span> </span>&#123;</span><br><span class="line">    public __hooks = &#123;</span><br><span class="line">        <span class="comment">// 元素节点 插入时机，触发 didMount</span></span><br><span class="line">        <span class="attr">insert</span>: <span class="function">() =&gt;</span> <span class="built_in">this</span>.componentDidMount(),</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 元素节点 更新之前，触发 getSnapshotBeforeUpdate</span></span><br><span class="line">        <span class="attr">willupdate</span>: <span class="function">(<span class="params">vnode</span>) =&gt;</span> &#123;</span><br><span class="line">            <span class="built_in">this</span>.__snapshot = <span class="built_in">this</span>.getSnapshotBeforeUpdate(<span class="built_in">this</span>.__prevProps, <span class="built_in">this</span>.__prevState)</span><br><span class="line">        &#125;,</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 元素节点 更新之后， 触发 didUpdate</span></span><br><span class="line">        <span class="attr">update</span>: <span class="function">(<span class="params">oldVNode, vnode</span>) =&gt;</span> &#123;</span><br><span class="line">            <span class="built_in">this</span>.componentDidUpdate(<span class="built_in">this</span>.__prevProps, <span class="built_in">this</span>.__prevState, <span class="built_in">this</span>.__snapshot)</span><br><span class="line">            <span class="built_in">this</span>.__snapshot = <span class="literal">undefined</span></span><br><span class="line">        &#125;,</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 元素节点 卸载之前， 触发 willUnmount</span></span><br><span class="line">        <span class="attr">willremove</span>: <span class="function">(<span class="params">vnode</span>) =&gt;</span> <span class="built_in">this</span>.componentWillUnmount(),</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 默认生命周期函数</span></span><br><span class="line">    <span class="comment">// getDerivedStateFromProps(nextProps, state)</span></span><br><span class="line">    public <span class="function"><span class="title">getSnapshotBeforeUpdate</span>(<span class="params">prevProps, prevState</span>)</span> &#123; <span class="keyword">return</span> <span class="literal">undefined</span> &#125;</span><br><span class="line">    public <span class="function"><span class="title">shouldComponentUpdate</span>(<span class="params">nextProps, nextState</span>)</span> &#123; <span class="keyword">return</span> <span class="literal">true</span> &#125;</span><br><span class="line">    public <span class="function"><span class="title">componentDidMount</span>(<span class="params"></span>)</span> &#123; &#125;</span><br><span class="line">    public <span class="function"><span class="title">componentDidUpdate</span>(<span class="params">prevProps, prevState, snapshot</span>)</span> &#123; &#125;</span><br><span class="line">    public <span class="function"><span class="title">componentWillUnmount</span>(<span class="params"></span>)</span> &#123; &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>然后我们只需要在 <code>__createVNode</code> 方法中将 <code>this.__hooks</code> 赋值给生成出的 <code>VNode</code> 即可:</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Component</span> </span>&#123;</span><br><span class="line">	...</span><br><span class="line"></span><br><span class="line">	public <span class="function"><span class="title">__createVNode</span>(<span class="params"></span>)</span> &#123;</span><br><span class="line">	    <span class="comment">// ...</span></span><br><span class="line">	    <span class="built_in">this</span>.__vnode = <span class="built_in">this</span>.render()</span><br><span class="line"></span><br><span class="line">	    <span class="comment">// 赋值给对应的 元素节点，</span></span><br><span class="line">	    <span class="comment">// 实现该 元素节点 与 组件 之间生命周期的绑定</span></span><br><span class="line">	    <span class="built_in">this</span>.__vnode.hooks = <span class="built_in">this</span>.__hooks</span><br><span class="line"></span><br><span class="line">	    <span class="keyword">return</span> <span class="built_in">this</span>.__vnode</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>最后，大家可能发现我们还有两个钩子没有实现: <code>getDerivedStateFromProps</code> 和 <code>shouldComponentUpdate</code>，这是因为这两个生命周期会影响到更新结果，因此需要 <strong>深入到更新流程中</strong>，无法单纯的通过 <strong>元素节点</strong> 的生命周期来实现。</p>
+<p>但其实也很简单，就是在 <strong>更新之前</strong>，需要根据这两个函数的返回结果，适当调整下更新逻辑即可:</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// Componet 中的 __update 方法</span></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Component</span> </span>&#123;</span><br><span class="line">	<span class="comment">// ...</span></span><br><span class="line"></span><br><span class="line">	public __update = <span class="function">() =&gt;</span> &#123;</span><br><span class="line">        <span class="comment">// 临时存储 旧虚拟节点 (oldVNode)</span></span><br><span class="line">        <span class="keyword">const</span> oldVNode = <span class="built_in">this</span>.__vnode</span><br><span class="line"></span><br><span class="line">        <span class="built_in">this</span>.__nextProps = <span class="built_in">this</span>.props</span><br><span class="line">        <span class="keyword">if</span> (!<span class="built_in">this</span>.__nextState) <span class="built_in">this</span>.__nextState = <span class="built_in">this</span>.state</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 执行 getDerivedStateFromProps</span></span><br><span class="line">        <span class="comment">// 更新 state 状态</span></span><br><span class="line">        <span class="keyword">const</span> cls = <span class="built_in">this</span>.constructor</span><br><span class="line">        <span class="keyword">if</span> (cls.getDerivedStateFromProps) &#123;</span><br><span class="line">            <span class="keyword">const</span> state = cls.getDerivedStateFromProps(<span class="built_in">this</span>.__nextProps, <span class="built_in">this</span>.state)</span><br><span class="line">            <span class="keyword">if</span> (state) &#123;</span><br><span class="line">                <span class="built_in">this</span>.__nextState = <span class="built_in">Object</span>.assign(<span class="built_in">this</span>.__nextState, state)</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 在 diff 之前调用 shouldComponentUpdate 进行判断</span></span><br><span class="line">        <span class="comment">// true: 生成新 VNode，继续 diff</span></span><br><span class="line">        <span class="comment">// false: 清空状态</span></span><br><span class="line">        <span class="keyword">if</span> (<span class="built_in">this</span>.shouldComponentUpdate(<span class="built_in">this</span>.props, <span class="built_in">this</span>.__nextState)) &#123;</span><br><span class="line">            <span class="comment">// 重新生成 新虚拟节点(newVNode)</span></span><br><span class="line">            <span class="built_in">this</span>.__vnode = <span class="built_in">this</span>.__createVNode()</span><br><span class="line"></span><br><span class="line">            <span class="comment">// 调用 diff，更新 VNode</span></span><br><span class="line">            diff(oldVNode, <span class="built_in">this</span>.__vnode)</span><br><span class="line">        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">            <span class="comment">// 清空状态更新</span></span><br><span class="line">            <span class="built_in">this</span>.__nextProps = <span class="built_in">this</span>.__nextState = <span class="literal">undefined</span></span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 刚才 异步更新队列 中标识的组件 待更新状态</span></span><br><span class="line">        <span class="comment">// 在更新完后置为 false</span></span><br><span class="line">        <span class="built_in">this</span>.__dirty = <span class="literal">false</span></span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>组件更新还有另外一个地方，即 <code>diffComponent</code>，也需要加入上述类似的执行和判断。完成这部分代码后，我们来简单测试个 DEMO:</p>
+<ul>
+<li><ol>
+<li><code>&lt;App&gt;</code>、<code>&lt;BBB txt=&#123;this.state.txt&#125; /&gt;</code> <strong>正确渲染</strong>；</li>
+</ol>
+</li>
+<li><ol start="2">
+<li>双组件 <strong>渲染生命周期</strong> 与预期一致；</li>
+</ol>
+</li>
+<li><ol start="3">
+<li><strong>触发更新</strong>，调用 <code>&lt;App&gt; setState</code>，<code>&lt;BBB&gt;</code> 文字元素正确更新；</li>
+</ol>
+</li>
+<li><ol start="4">
+<li>双组件 <strong>更新生命周期</strong> 与预期一致；</li>
+</ol>
+</li>
+</ul>
+<p><img class="lazy" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAABGdBTUEAALGPC/xhBQAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAAaADAAQAAAABAAAAAQAAAADa6r/EAAAAC0lEQVQIHWNgAAIAAAUAAY27m/MAAAAASUVORK5CYII=" data-src="https://user-gold-cdn.xitu.io/2020/3/24/1710a381f500d6d3?w=550&h=417&f=gif&s=4875150"></p>
+<p style="text-align: center;font-weight: bold;">图1. 生命周期演示DEMO</p>
+
+<h2 id="最后一站-旅途之末"><a href="#最后一站-旅途之末" class="headerlink" title="最后一站: 旅途之末"></a>最后一站: 旅途之末</h2><p>在这系列文章中，我们实现了 React 最核心的部分: <strong>JSX、组件、渲染、更新</strong>。我们基于 <strong>动手实践</strong> 的方式，循序渐进地探讨了一些原理与策略，得出一些最佳实践。相信走完这遍旅程后，大家能对 React 有了更深层次的了解，能够给到各位小伙伴启发与帮助。其实我也一样，也是在这个旅程中跟大家一起共同学习，共同成长。</p>
+
+
+<div class="article-footer reveal fs14"><section id="license"><div class="header"><span>许可协议</span></div><div class="body"><p>本文采用 <a target="_blank" rel="noopener" href="https://creativecommons.org/licenses/by-nc-sa/4.0/">署名-非商业性使用-相同方式共享 4.0 国际</a> 许可协议，转载请注明出处。</p>
+</div></section></div>
+
+</article>
+
+<div class="related-wrap reveal" id="read-next"><section class="header cap theme"><span>接下来阅读</span></section><section class="body fs14"><a id="next" href="/2018/08/12/React-%E5%8E%9F%E7%90%86%E6%8F%AD%E7%A7%98%E5%AE%9E%E8%B7%B5-%E4%B8%8A/">React-原理揭秘实践(上)<span class="note">较早</span></a><div class="line"></div><a id="prev" href="/2018/10/28/%E4%B8%AD%E9%AB%98%E7%BA%A7%E5%89%8D%E7%AB%AF%E7%A7%98%E7%B1%8D(%E4%B8%8A)/">中高级前端秘籍(上)<span class="note">较新</span></a><div class="line"></div><a id="more" href="/archives">检索全部文章</a></section></div>
+
+
+
+
+
+
+
+
+      
+<footer class="page-footer reveal fs12"><hr><div class="text"><p>本博客所有文章除特别声明外，均采用 <a target="_blank" rel="noopener" href="https://creativecommons.org/licenses/by-nc-sa/4.0/">CC BY-NC-SA 4.0</a> 许可协议，转载请注明出处。</p>
+<p>本站由 <a href="https://basilbai.github.io/">@Basil</a> 创建，使用 <a target="_blank" rel="noopener" href="https://github.com/xaoxuu/hexo-theme-stellar/tree/1.5.2" title="v1.5.2">Stellar</a> 作为主题。</p>
+</div></footer>
+
+      <div class='float-panel mobile-only blur' style='display:none'>
+  <button type='button' class='sidebar-toggle mobile' onclick='sidebar.toggle()'>
+    <svg class="icon" style="width: 1em; height: 1em;vertical-align: middle;fill: currentColor;overflow: hidden;" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="15301"><path d="M566.407 808.3c26.9-0.1 49.3-20.8 51.6-47.6-1.9-27.7-23.9-49.7-51.6-51.6h-412.6c-28.2-1.4-52.6 19.5-55.5 47.6 2.3 26.8 24.6 47.5 51.6 47.6h416.5v4z m309.3-249.9c26.9-0.1 49.3-20.8 51.6-47.6-2.2-26.8-24.6-47.5-51.6-47.6h-721.9c-27.7-2.8-52.5 17.4-55.3 45.1-0.1 0.8-0.1 1.7-0.2 2.5 0.9 27.2 23.6 48.5 50.7 47.6H875.707z m-103.1-245.9c26.9-0.1 49.3-20.8 51.6-47.6-0.4-28.3-23.2-51.1-51.5-51.6h-618.9c-29.5-1.1-54.3 21.9-55.5 51.4v0.2c1.4 27.8 25.2 49.2 53 47.8 0.8 0 1.7-0.1 2.5-0.2h618.8z" p-id="15302"></path><path d="M566.407 808.3c26.9-0.1 49.3-20.8 51.6-47.6-1.9-27.7-23.9-49.7-51.6-51.6h-412.6c-28.2-1.4-52.6 19.5-55.5 47.6 1.9 27.7 23.9 49.7 51.6 51.6h416.5z m309.3-249.9c26.9-0.1 49.3-20.8 51.6-47.6-2.2-26.8-24.6-47.5-51.6-47.6h-721.9c-27.7-2.8-52.5 17.4-55.3 45.1-0.1 0.8-0.1 1.7-0.2 2.5 0.9 27.2 23.6 48.5 50.7 47.6H875.707z m-103.1-245.9c26.9-0.1 49.3-20.8 51.6-47.6-0.4-28.3-23.2-51.1-51.5-51.6h-618.9c-29.5-1.1-54.3 21.9-55.5 51.4v0.2c1.4 27.8 25.2 49.2 53 47.8 0.8 0 1.7-0.1 2.5-0.2h618.8z" p-id="15303"></path></svg>
+  </button>
+</div>
+
+    </div>
+  </div>
+  <div class='scripts'>
+    <script type="text/javascript">
+  stellar = {
+    // 懒加载 css https://github.com/filamentgroup/loadCSS
+    loadCSS: (href, before, media, attributes) => {
+      var doc = window.document;
+      var ss = doc.createElement("link");
+      var ref;
+      if (before) {
+        ref = before;
+      } else {
+        var refs = (doc.body || doc.getElementsByTagName("head")[0]).childNodes;
+        ref = refs[refs.length - 1];
+      }
+      var sheets = doc.styleSheets;
+      if (attributes) {
+        for (var attributeName in attributes) {
+          if (attributes.hasOwnProperty(attributeName)) {
+            ss.setAttribute(attributeName, attributes[attributeName]);
+          }
+        }
+      }
+      ss.rel = "stylesheet";
+      ss.href = href;
+      ss.media = "only x";
+      function ready(cb) {
+        if (doc.body) {
+          return cb();
+        }
+        setTimeout(function () {
+          ready(cb);
+        });
+      }
+      ready(function () {
+        ref.parentNode.insertBefore(ss, before ? ref : ref.nextSibling);
+      });
+      var onloadcssdefined = function (cb) {
+        var resolvedHref = ss.href;
+        var i = sheets.length;
+        while (i--) {
+          if (sheets[i].href === resolvedHref) {
+            return cb();
+          }
+        }
+        setTimeout(function () {
+          onloadcssdefined(cb);
+        });
+      };
+      function loadCB() {
+        if (ss.addEventListener) {
+          ss.removeEventListener("load", loadCB);
+        }
+        ss.media = media || "all";
+      }
+      if (ss.addEventListener) {
+        ss.addEventListener("load", loadCB);
+      }
+      ss.onloadcssdefined = onloadcssdefined;
+      onloadcssdefined(loadCB);
+      return ss;
+    },
+
+    // 从 butterfly 和 volantis 获得灵感
+    loadScript: (src, opt) => new Promise((resolve, reject) => {
+      var script = document.createElement('script');
+      script.src = src;
+      if (opt) {
+        for (let key of Object.keys(opt)) {
+          script[key] = opt[key]
+        }
+      } else {
+        // 默认异步，如果需要同步，第二个参数传入 {} 即可
+        script.async = true
+      }
+      script.onerror = reject
+      script.onload = script.onreadystatechange = function() {
+        const loadState = this.readyState
+        if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+        script.onload = script.onreadystatechange = null
+        resolve()
+      }
+      document.head.appendChild(script)
+    }),
+
+    // https://github.com/jerryc127/hexo-theme-butterfly
+    jQuery: (fn) => {
+      if (typeof jQuery === 'undefined') {
+        stellar.loadScript(stellar.plugins.jQuery).then(fn)
+      } else {
+        fn()
+      }
+    }
+  };
+  stellar.github = 'https://github.com/xaoxuu/hexo-theme-stellar/tree/1.5.2';
+  stellar.config = {
+    date_suffix: {
+      just: '刚刚',
+      min: '分钟前',
+      hour: '小时前',
+      day: '天前',
+      month: '个月前',
+    },
+  };
+
+  // required plugins (only load if needs)
+  stellar.plugins = {
+    jQuery: 'https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.min.js',
+    sitesjs: '/js/plugins/sites.js',
+    friendsjs: '/js/plugins/friends.js',
+  };
+
+  // optional plugins
+  if ('true' == 'true') {
+    stellar.plugins.lazyload = Object.assign({"enable":true,"js":"https://cdn.jsdelivr.net/npm/vanilla-lazyload@17.3.1/dist/lazyload.min.js","transition":"blur"});
+  }
+  if ('true' == 'true') {
+    stellar.plugins.swiper = Object.assign({"enable":true,"css":"https://unpkg.com/swiper@6/swiper-bundle.min.css","js":"https://unpkg.com/swiper@6/swiper-bundle.min.js"});
+  }
+  if ('' == 'true') {
+    stellar.plugins.scrollreveal = Object.assign({"enable":null,"js":"https://cdn.jsdelivr.net/npm/scrollreveal@4.0.9/dist/scrollreveal.min.js","distance":"8px","duration":500,"interval":100,"scale":1});
+  }
+  if ('true' == 'true') {
+    stellar.plugins.preload = Object.assign({"enable":true,"service":"flying_pages","instant_page":"https://cdn.jsdelivr.net/gh/volantis-x/cdn-volantis@4.1.2/js/instant_page.js","flying_pages":"https://cdn.jsdelivr.net/gh/gijo-varghese/flying-pages@2.1.2/flying-pages.min.js"});
+  }
+</script>
+
+<!-- required -->
+
+  
+<script src="/js/main.js" async></script>
+
+
+
+<!-- optional -->
+
+
+
+<!-- inject -->
+
+
+  </div>
+</body>
+</html>
